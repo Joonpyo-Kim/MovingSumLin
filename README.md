@@ -1,1 +1,2 @@
-# Change Points Detection based on Moving Sum Method under Piecewise Linearity
+# Change Points Detection under Piecewise Linearity
+## based on Moving Sum Method
