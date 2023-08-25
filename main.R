@@ -11,7 +11,7 @@ G_vec <- c(50, 100, 150, 250, 400, 650)
 MOSUM_linear(y, G_vec=G_vec, sort.G="bic")
 
 
-## Simulation 1
+## Simulation 1: (M1) with (E1)
 set.seed(191009)
 cp.true <- c(10, 20, 25)
 simuldata <- vector('list', length=6)
@@ -109,7 +109,7 @@ apply(maxscore2_mosum_simul1, 1, mean)
 apply(hausdorff_mosum_simul1, 1, mean)
 
 
-## Simulation 2
+## Simulation 2: (M2) with (E2)
 set.seed(220518)
 cp.true <- c(10, 20, 25)
 simuldata2 <- vector('list', length=6)
@@ -128,21 +128,37 @@ for(snr in 1:4){
   }
 }
 
-## Simulation 3
-set.seed(220529)
+## Simulation 3: (M1) under (E4)
+set.seed(230602)
 cp.true <- c(10, 20, 25)
-simuldata3 <- vector('list', length=4)
-sd.vec <- c(0.5, 1, 1.5, 2)
+rho <- 0.3
+# rho <- 0.7
+simuldata <- vector('list', length=4)
+snr.vec <- c(0.5, 1, 1.5, 2) * sqrt(1-rho^2) # this is sigma_delta. 
 for(snr in 1:4){
-  sd.noise <- sd.vec[snr]
-  simuldata3[[snr]] <- vector('list', length=1000)
+  sd.noise <- snr.vec[snr] # this is sigma_delta. 
+  simuldata[[snr]] <- vector('list', length=1000)
   for(iter in 1:1000){
-    beta <- c(-1, 1, -2.5, 2.5)*2+rnorm(4, sd=0.2)
-    underlying <- c(rep(beta[1], 1000), rep(beta[2], 1000), rep(beta[3], 500), rep(beta[4], 1000))
-    y<-underlying+rnorm(length(underlying),sd=sd.noise)
+    
+    beta <- c(-1, -1, -2.5, 2.5)+rnorm(4, sd=0.2)
+    underlying <- c(seq(beta[1]*(0.01-10)+10, 10, length=1000), beta[2]*seq(from=0.01, to=10, length=1000), 10*(1+beta[2])+beta[3]*seq(from=0.01, to=5, length=500), 10*(1+beta[2])+5*beta[3]+beta[4]*seq(from=0.01, to=10, length=1000))
+    # len_eps <- length(underlying) + 500 
+    # epsilon <- vector(length = len_eps)
+    # epsilon[1] <- rnorm(1, sd = sd.noise)
+    # for(i in 2:len_eps){
+    #   epsilon[i] <- rho * epsilon[i-1] + rnorm(1, sd = sd.noise)
+    # }
+    # epsilon <- epsilon[501:len_eps]
+    epsilon <- arima.sim(n = 3500, list(ar = rho), sd = sd.noise)
+    y<-underlying+epsilon
     time <- (1:length(y))/100
-    simuldata3[[snr]][[iter]]$time <- time
-    simuldata3[[snr]][[iter]]$value <- y
-    simuldata3[[snr]][[iter]]$underlying <- underlying
+    simuldata[[snr]][[iter]]$time <- time
+    simuldata[[snr]][[iter]]$value <- y
+    simuldata[[snr]][[iter]]$underlying <- underlying
   }
 }
+
+y <- simuldata[[3]][[1]]$value
+G_vec <- c(50, 100, 150, 250, 400, 650)
+MOSUM_linear(y, G_vec=G_vec, sort.G="bic") # MOSUM
+MOSUM_linear_ar(y, G_vec=G_vec, sort.G="bic") # MOSUMdlrv
