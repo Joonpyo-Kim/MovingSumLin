@@ -22,10 +22,13 @@ Following code illustrates a toy example.
 
 ```{r}
 beta <- c(-1, -1, -2.5, 2.5)+rnorm(4, sd=0.2)
-underlying <- c(seq(beta[1]*(0.01-10)+10, 10, length=1000), beta[2]*seq(from=0.01, to=10, length=1000), 
+f <- c(seq(beta[1]*(0.01-10)+10, 10, length=1000), beta[2]*seq(from=0.01, to=10, length=1000), 
                 10*(1+beta[2])+beta[3]*seq(from=0.01, to=5, length=500), 
                 10*(1+beta[2])+5*beta[3]+beta[4]*seq(from=0.01, to=10, length=1000))
-y<-underlying+rnorm(length(underlying),0,sd=1)
+y<- f + rnorm(length(f),0,sd=1)
+
+plot(y, pch = 16, cex = .5, col = "gray80")
+lines(f, lwd = 2, col = "blue")
 
 G_vec <- c(50, 100, 150, 250, 400, 650)
 MOSUM_linear(y, G_vec=G_vec, sort.G="bic")
