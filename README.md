@@ -3,7 +3,7 @@
 R function `MOSUM_linear` conducts the moving sum based change points detection proposed by 
 > Kim, J., Oh, H. S., & Cho, H. (2022+). <a href = "https://arxiv.org/abs/2208.04900">Moving sum procedure for change point detection under piecewise linearity</a>. 
 
-To implement `MOSUM_linear` function, you first have to source `MOSUM_linear.R` file in R. 
+To implement `MOSUM_linear` function, you first have to source `MOSUM_linear.R` file in R. It includes the procedure loading functions in `mosumCwald.cpp`. For this `Rcpp` package should be preliminarily installed.
 ```{r}
 source("MOSUM_linear.R")
 ```
