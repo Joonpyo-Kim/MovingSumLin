@@ -2,7 +2,7 @@ library(Rcpp)
 library(tidyverse)
 sourceCpp("mosumCwald.cpp")
 
-MOSUM.cp.candidate <- function(y, time, G, eta = .3){
+MOSUM.cp.candidate <- function(y, time, G, eta = .3, alpha = .05){
   # y : vector of observations
   # G_vec : Vector of bandwidths to be used 
   # eta : a numeric value in (0,1/2) for the minimal size of exceeding environments
@@ -14,7 +14,7 @@ MOSUM.cp.candidate <- function(y, time, G, eta = .3){
   logH <- 0.7284
   b0_G <- 2*log(n/G) + log(log(n/G)) + logH
   a_G <- sqrt(2*log(n/G))
-  q_G <- (b0_G - log(-log(0.95)/2))/a_G      
+  q_G <- (b0_G - log(-log(1 - alpha)/2))/a_G      
   
   # Wald-type statistics
   TG <- mosumCwald(y, time, G=G)
@@ -67,7 +67,7 @@ MOSUM_linear <- function(y, time=c(1:length(y)), G_vec, eta=.3, theta=.8, alpha=
     lag <- G_vec.sort[lag.idx]
     
     # find candidates
-    cp.candidate.obj <- MOSUM.cp.candidate(y, time, G = lag, eta = eta)
+    cp.candidate.obj <- MOSUM.cp.candidate(y, time, G = lag, eta = eta, alpha = alpha)
     cp_G.index <- cp.candidate.obj$cp
     TG_G <- cp.candidate.obj$TG
     
@@ -82,8 +82,8 @@ MOSUM_linear <- function(y, time=c(1:length(y)), G_vec, eta=.3, theta=.8, alpha=
     if(sort.G == "cvc"){
       odd <- seq(from = 1, to = n, by = 2)
       even <- seq(from = 2, to = n, by = 2)
-      cp_odd  <- MOSUM.cp.candidate(y[odd], time[odd], G = floor(lag/2), eta = eta, crit = crit)$cp
-      cp_even <- MOSUM.cp.candidate(y[even], time[even], floor(lag/2), eta = eta, crit = crit)$cp
+      cp_odd  <- MOSUM.cp.candidate(y[odd], time[odd], G = floor(lag/2), eta = eta, crit = crit, alpha = alpha)$cp
+      cp_even <- MOSUM.cp.candidate(y[even], time[even], floor(lag/2), eta = eta, crit = crit, alpha = alpha)$cp
       cvc <- cv_criterion(data = y, train = odd, test = even, cp = cp_odd) + 
         cv_criterion(data = y, train = even, test = odd, cp = cp_even)
       cp_cand_df <- rbind(cp_cand_df, data.frame(G=rep(lag, length(cp_G.index)), cp=cp_G.index, 
@@ -184,7 +184,7 @@ dlrv_simple = function(x){
 
 # Candidate using LRV estimator
 
-MOSUM.cp.candidate.ar <- function(y, time, G, eta = .3){
+MOSUM.cp.candidate.ar <- function(y, time, G, eta = .3, alpha = .05){
   # y : vector of observations
   # G_vec : Vector of bandwidths to be used 
   # eta : a numeric value in (0,1/2) for the minimal size of exceeding environments
@@ -196,7 +196,7 @@ MOSUM.cp.candidate.ar <- function(y, time, G, eta = .3){
   logH <- 0.7284
   b0_G <- 2*log(n/G) + log(log(n/G)) + logH
   a_G <- sqrt(2*log(n/G))
-  q_G <- (b0_G - log(-log(0.95)/2))/a_G    
+  q_G <- (b0_G - log(-log(1 - alpha)/2))/a_G    
   
   # Wald-type statistics
   
